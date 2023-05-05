@@ -1,34 +1,42 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import * as Yup from 'yup';
-import { makeStyles } from '@material-ui/core/styles';
-import { Typography, TextField, Button } from '@material-ui/core';
+import React from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import { TextField, Button, Grid, Box, Typography } from "@mui/material";
+import { makeStyles } from "@material-ui/core";
+import { Link } from "react-router-dom";
+
+const validationSchema = Yup.object().shape({
+  name: Yup.string().min(5).required('Name is required'),
+  email: Yup.string().email('Invalid email').required('Email is required'),
+  password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
+  confirmPassword: Yup.string().oneOf([Yup.ref('password'), null], 'Passwords must match').required('Confirm Password is required'),
+});
+const initialValues = {
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+};
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
     marginTop: theme.spacing(4),
   },
   form: {
-    display: 'flex',
-    flexDirection: 'column',
+    display: "flex",
+    flexDirection: "column",
     maxWidth: 400,
-    width: '100%',
-  },
-  input: {
-    margin: theme.spacing(1),
-  },
-  button: {
-    margin: theme.spacing(2),
+    width: "100%",
+    marginTop: "2rem",
   },
   link: {
     color: theme.palette.primary.main,
-    textDecoration: 'none',
-    '&:hover': {
-      textDecoration: 'underline',
+    textDecoration: "none",
+    "&:hover": {
+      textDecoration: "underline",
     },
   },
   error: {
@@ -37,56 +45,93 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function SignUp() {
+const handleSubmit = (values) => {
+  console.log(values); // Replace with actual form submission logic
+};
+
+const SignUp = () => {
   const classes = useStyles();
-
-  const initialValues = {
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-  };
-
-  const validationSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required'),
-    email: Yup.string().email('Invalid email').required('Email is required'),
-    password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
-    confirmPassword: Yup.string().oneOf([Yup.ref('password'), null], 'Passwords must match').required('Confirm Password is required'),
-  });
-
-  const onSubmit = (values, { setSubmitting, setErrors }) => {
-    console.log(values);
-    setSubmitting(false);
-  };
-
   return (
     <div className={classes.root}>
       <Typography variant="h4">Sign Up</Typography>
-      <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
-        {({ isSubmitting }) => (
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={handleSubmit}
+      >
+        {({ errors, touched }) => (
           <Form className={classes.form}>
-            <TextField className={classes.input} label="Name" name="name" type="text" />
-            <ErrorMessage name="name" render={(msg) => <div className={classes.error}>{msg}</div>} />
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <Field
+                  as={TextField}
+                  name="name"
+                  label="Name"
+                  fullWidth
+                  error={errors.name && touched.name}
+                  helperText={errors.name && touched.name ? errors.email : ""}
+                />
+                <ErrorMessage name="name" render={(msg) => <div className={classes.error}>{msg}</div>} />
 
-            <TextField className={classes.input} label="Email" name="email" type="email" />
-            <ErrorMessage name="email" render={(msg) => <div className={classes.error}>{msg}</div>} />
-            <TextField className={classes.input} label="Password" name="password" type="password" />
-            <ErrorMessage name="password" render={(msg) => <div className={classes.error}>{msg}</div>} />
-
-            <TextField className={classes.input} label="Confirm Password" name="confirmPassword" type="password" />
-            <ErrorMessage name="confirmPassword" render={(msg) => <div className={classes.error}>{msg}</div>} />
-
-            <Button className={classes.button} variant="contained" color="primary" type="submit" disabled={isSubmitting}>
-              Sign Up
-            </Button>
+              </Grid>
+              <Grid item xs={12}>
+                <Field
+                  name="email"
+                  as={TextField}
+                  label="Email"
+                  fullWidth
+                  type="email"
+                  error={touched.email && Boolean(errors.email)}
+                  helperText={touched.email && errors.email}
+                />
+                <ErrorMessage name="email" render={(msg) => <div className={classes.error}>{msg}</div>} />
+              </Grid>
+              
+              <Grid item xs={12}>
+                <Field
+                  name="password"
+                  as={TextField}
+                  label="Password"
+                  type="password"
+                  fullWidth
+                  error={touched.password && Boolean(errors.password)}
+                  helperText={touched.password && errors.password}
+                />
+                <ErrorMessage name="Password" render={(msg) => <div className={classes.error}>{msg}</div>} />
+              </Grid>
+              <Grid item xs={12}>
+                <Field
+                  name="confirmPassword"
+                  as={TextField}
+                  label="Confirm Password"
+                  type="password"
+                  fullWidth
+                  error={touched.password && Boolean(errors.password)}
+                  helperText={touched.password && errors.confirmPassword}
+                />
+                <ErrorMessage name="confirmPassword" render={(msg) => <div className={classes.error}>{msg}</div>} />
+              </Grid>
+              <Grid item xs={12}>
+                <Box display="flex" justifyContent="space-between">
+                  <Button
+                    variant="contained"
+                    type="submit"
+                  >
+                    Sign Up
+                  </Button>
+                  <Typography className="">
+                    Already have an account?
+                    <Link to="/" className={classes.link}>
+                      SignIn
+                    </Link>
+                  </Typography>
+                </Box>
+              </Grid>
+            </Grid>
           </Form>
         )}
       </Formik>
-      <Typography>
-        Already have an account? <Link className={classes.link} to="/">Sign In</Link>
-      </Typography>
     </div>
   );
-}
-
+};
 export default SignUp;
